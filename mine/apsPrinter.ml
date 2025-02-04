@@ -5,10 +5,10 @@ open Ast
 
 let rec print_type t =
   match t with
-  | ASTBool -> Printf.printf"bool"
-  | ASTInt -> Printf.printf"int"
+  | ASTBool -> Printf.printf" ASTBool "
+  | ASTInt -> Printf.printf" ASTInt "
   | ASTArrow (ts,t2) -> (
-    Printf.printf"arrow(";
+    Printf.printf"ASTArrow(";
     print_types ts;
     print_char ',';
     print_type t2;
@@ -29,7 +29,7 @@ and print_types ts =
 let print_arg a = 
   match a with
   | ASTArg(str, t) -> (
-        Printf.printf "arg(%s,"str;
+        Printf.printf "ASTArg(%s,"str;
         print_type t;
         Printf.printf")";
       )
@@ -47,31 +47,31 @@ let print_arg a =
     
 let rec print_expr e =
   match e with
-  | ASTNum n -> Printf.printf"num(%d)" n
-  | ASTId x -> Printf.printf"id(%s)" x
+  | ASTNum n -> Printf.printf"ASTNum(%d)" n
+  | ASTId x -> Printf.printf"ASTId(%s)" x
   | ASTApp(e, es) -> (
-      Printf.printf"app(";
+      Printf.printf"ASTApp(";
       print_expr e;
       Printf.printf",[";
       print_exprs es;
       Printf.printf"])";
   )
   | ASTAnd(e, ne) -> (
-      Printf.printf"and(";
+      Printf.printf"ASTAnd(";
       print_expr e;
       print_char ',';
       print_expr ne;
       Printf.printf")";
   )
   | ASTOr(e, ne) -> (
-      Printf.printf"or(";
+      Printf.printf"ASTOr(";
       print_expr e;
       print_char ',';
       print_expr ne;
       Printf.printf")";
   )
   | ASTIf(con, body, alternant) -> (
-      Printf.printf"if(";
+      Printf.printf"ASTIf(";
       print_expr con;
       print_char ',';
       print_expr body;
@@ -80,7 +80,7 @@ let rec print_expr e =
       Printf.printf")";
   )
   | ASTLambda(args, e) -> (
-      Printf.printf"lambda(";
+      Printf.printf"ASTLambda(";
       Printf.printf"[";
       print_args args;
       Printf.printf"],";
@@ -101,7 +101,7 @@ let rec print_expr e =
 let print_stat s = 
   match s with
   | ASTEcho e -> (
-      Printf.printf"echo(";
+      Printf.printf"ASTEcho(";
       print_expr e;
       Printf.printf")";
   )
@@ -109,14 +109,14 @@ let print_stat s =
 let print_def d = 
   match d with
   | ASTConst(str , ttype, expr) -> (
-      Printf.printf"const( %s," str;
+      Printf.printf"ASTConst( %s," str;
       print_type ttype;
       print_char ',';
       print_expr expr;
       Printf.printf ")" 
   )
   | ASTFun(str, ttype, args, expr) -> (
-      Printf.printf"fun(%s,"str;
+      Printf.printf"ASTFun(%s,"str;
       print_type ttype;
       print_char ',';
       print_args args;
@@ -125,7 +125,7 @@ let print_def d =
       Printf.printf")";
   )
   | ASTFunRec(str, ttype, args, expr) -> (
-      Printf.printf"funRec(%s,"str;
+      Printf.printf"ASTFunRec(%s,"str;
       print_type ttype;
       print_char ',';
       print_args args;
@@ -151,9 +151,9 @@ let rec print_cmds cs =
 
 
 let print_prog p =
-  Printf.printf"prog(";
+  Printf.printf"ASTProg([";
   print_cmds p;
-  Printf.printf")"
+  Printf.printf"])"
 ;;
 
 let fname = Sys.argv.(1) in

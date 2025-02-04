@@ -8,7 +8,7 @@
 rule token = parse
     [' ' '\t' '\n'] { token lexbuf } (* skip blank *)
     | '[' { LBRA }
-    | '}' { RBRA }
+    | ']' { RBRA }
     | '(' { LPAR }
     | ')' { RPAR }
     | ';' { SEMIC }

@@ -25,7 +25,7 @@ type stat =
 type def = 
 | ASTConst of string * ttype * expr
 | ASTFun of string * ttype * arg list * expr
-| ASTFuncRec of string * ttype * arg list * expr
+| ASTFunRec of string * ttype * arg list * expr
 
 type cmd = 
   | ASTStat of stat

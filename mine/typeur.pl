@@ -1,0 +1,39 @@
+% Comment
+BtProg(prog(Cs)) :-
+    bt_cmds(G,Cs),
+    is_init_env(G).
+
+is_init_env(G) :-
+    G = [
+        ("true", bool),
+        ("false", bool),
+        ("not", fun(bool, bool)),
+        ("eq", fun([int, int], bool)),
+        ("lt", fun([int, int], bool)),
+        ("add", fun([int, int], int)),
+        ("sub", fun([int, int], int)),
+        ("mul", fun([int, int], int)),
+        ("div", fun([int, int], int))
+    ].
+
+bt_cmds(_,_).
+
+bt_expr(G,id(X),T) :- member( (X,T), G).
+
+bt_const(G,const(X,T,E),[(X,T) | G]):-
+    member((E,T), G).
+
+% to check arguments in function calls
+BtCheckArgs(G,[(X,T) | Rest]) :-
+   member((X,T),G),
+   bt_check_args(G,Rest).
+
+bt_check_args(G,[]). % to end recursion
+
+bt_fun(G,fun(X,T,Args,e), [ (X, fun(Args,T)) | G ]) :-
+    bt_check_args(G,Args),
+    bt_expr(G,e,T). % type T to expression
+
+
+
+

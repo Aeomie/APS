@@ -11,7 +11,17 @@
 
 %token CONST FUN REC ECHO IF AND OR BOOL INT
 
+%type <Ast.expr> expr
+%type <Ast.expr list> exprs
+%type <Ast.cmd list> cmds
+%type <Ast.ttype> type
+%type <Ast.ttype list> types
+%type <Ast.arg> arg
+%type <Ast.arg list> args
+%type <Ast.def> def
+%type <Ast.stat> stat
 
+%type <Ast.cmd list> prog
 %start prog
 
 %%
@@ -31,7 +41,7 @@ stat:
 def:
     CONST IDENT type expr { ASTConst($2, $3 , $4) }
     | FUN IDENT type LBRA args RBRA expr { ASTFun($2, $3 , $5, $7) }
-    | FUN REC IDENT type LBRA args RBRA expr { ASTFuncRec($3, $4, $6, $8) }
+    | FUN REC IDENT type LBRA args RBRA expr { ASTFunRec($3, $4, $6, $8) }
 ;
 
 types:
