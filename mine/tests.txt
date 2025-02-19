@@ -2,3 +2,36 @@ bt_prog(prog(fun(f, int, [(x, int), (y, int)], id(x)))).
 bt_prog(prog(funRec(f, int, [(x, int), (y, int)], id(x)))).
 
 is_init_env(G),bt_addtoE(G,X,T,NewG),bt_stat(NewG,echo(X)).
+
+is_init_env(G),bt_addtoE(G,id(po),bool).
+
+is_init_env(G), 
+bt_addtoE(G, lol, bool, TempG), 
+bt_addtoE(TempG, bar, bool, NewG),
+member((lol,bool),NewG).
+
+// false result
+is_init_env(G), 
+bt_addtoE(G, id(x), int, TempG), 
+bt_addtoE(TempG, id(p), int, NewG),
+member((id(x),bool),NewG).
+
+// checking the addtoEn
+is_init_env(G),bt_addtoE(G, id(x), int, TempG),member((id(x),int),TempG).
+is_init_env(G),bt_addtoE(G, id(x), int, TempG),member((id(x),int),TempG),writeln(TempG).
+
+is_init_env(G),bt_addtoE(G, "lol", int, TempG),bt_addtoE(TempG, "booka", int, newG),member((id("lol"),int),newG).
+
+
+// checking or 
+
+is_init_env(G), 
+bt_addtoE(G, "lol", bool, TempG), 
+bt_addtoE(TempG, "bar", bool, NewG),
+bt_or(NewG, or(id("lol"), id("bar")), bool).
+
+// checking and
+is_init_env(G), 
+bt_addtoE(G, "lol", bool, TempG), 
+bt_addtoE(TempG, "bar", bool, NewG),
+bt_and(NewG, and(id("lol"), id("bar")), bool).
