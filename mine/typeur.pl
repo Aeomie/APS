@@ -51,15 +51,15 @@ bt_defs(G,fun(FuncName,T,Args,E), New_G) :-
     append(Args,G,G_Temp),
     bt_expr(G_Temp,E,T), % type T to expression
     bt_get_types(Args, Result),
-    New_G = [(FuncName,func(Result,T))| G].
+    New_G = [(FuncName,fun(Result,T))| G].
 
 bt_defs(G,funRec(FuncName, T, Args, E), New_G) :-
     write('In funcRec : '),write(FuncName),nl,
     append(Args, G, G_Temp),
     bt_get_types(Args, Result),
-    G_Temp2 = [(FuncName, func(Result, T)) | G_Temp],
+    G_Temp2 = [(FuncName, fun(Result, T)) | G_Temp],
     bt_expr(G_Temp2, E, T),
-    New_G = [(FuncName, func(Result, T)) | G].
+    New_G = [(FuncName, fun(Result, T)) | G].
 
 /*-----------END DEFS------------*/
 
@@ -81,7 +81,7 @@ bt_expr(_,num(X),int):-
 %id
 bt_expr(G,id(X),T) :-
     write('in ID : '), write(X),nl,
-    parcours(X,G,T).
+    member((X,T),G).
 
 %if
 bt_expr(G,if(E1,E2,E3),T):-
@@ -109,18 +109,23 @@ bt_expr(G,or(E1,E2),bool):-
     bt_expr(G,E1,bool),
     bt_expr(G,E2,bool).
 
-%app
-bt_expr(G, app(E,Args),T):-
-    write('in App '),nl,
-    bt_expr(G, E, fun(ArgsTypes,T)), %% checks if E is func, since it checks if E is of type fun
-    bt_compareArgs(G,Args,ArgsTypes).
-
 % Lambda
-bt_expr(G,lambda(Args,E),func(Result,T)):-
+bt_expr(G,lambda(Args,E),fun(Result,T)):-
     write('in Lambda '),nl,
     append(Args,G,New_G),
     bt_get_types(Args,Result),
     bt_expr(New_G,E,T).
+
+%app
+bt_expr(G, app(E,Args),T):-
+    write('in App '),nl,
+    write('Expression : '),write(E),nl,
+    write('Args : '), write(Args),nl,
+    write('Environment : ' ), write(G),nl,
+    write('Type T : '),write(T),nl,
+    bt_expr(G, E, fun(ArgsTypes,T)), %% checks if E is func, since it checks if E is of type fun
+    bt_compareArgs(G,Args,ArgsTypes).
+
 
 /*************END EXPRESSIONS***************/
 
