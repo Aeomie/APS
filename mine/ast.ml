@@ -29,6 +29,6 @@ type def =
 
 type cmd = 
   | ASTStat of stat
-  | ASTDef of def
+  | ASTDef of def * cmd
 
 

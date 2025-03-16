@@ -11,20 +11,20 @@ rule token = parse
     | ']' { RBRA }
     | '(' { LPAR }
     | ')' { RPAR }
-    | ';' { SEMIC }
-    | ':' { DP } (* Double Points *)
-    | ',' { COMMA }
-    | '*' { STAR }
     | "->" { ARROW }
+    | "*" { STAR }
+    | ";" { SEMIC }
+    | ":" { DP } 
+    | "," { COMMA }
+    | "ECHO"           { ECHO } 
     | "CONST"   { CONST}
     | "FUN" {FUN}
-    | "REC"     {REC}
-    | "ECHO"           { ECHO }   
+    | "REC"     {REC}  
+    | "bool"    { BOOL }
+    | "int"     { INT } 
     | "if"  { IF }
     | "and"     { AND }
     | "or"  { OR }
-    | "bool"    { BOOL }
-    | "int"     { INT } 
     | "true" | "false" | "not" | "eq" | "lt" | "add" | "sub" | "mul" | "div" as lxm { IDENT(lxm) }
     | ['0'-'9']+('.'['0'-'9'])? as lxm { NUM(int_of_string lxm) }
     | ['a'-'z']['a'-'z''A'-'Z''0'-'9']* as lxm { IDENT(lxm) }

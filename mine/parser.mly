@@ -13,7 +13,7 @@
 
 %type <Ast.expr> expr
 %type <Ast.expr list> exprs
-%type <Ast.cmd list> cmds
+%type <Ast.cmd> cmds
 %type <Ast.ttype> type
 %type <Ast.ttype list> types
 %type <Ast.arg> arg
@@ -21,7 +21,7 @@
 %type <Ast.def> def
 %type <Ast.stat> stat
 
-%type <Ast.cmd list> prog
+%type <Ast.cmd> prog
 %start prog
 
 %%
@@ -30,8 +30,8 @@ prog:
 ;
 
 cmds:
-    stat { [ASTStat $1] }
-    | def SEMIC cmds { ASTDef($1) :: $3}
+    stat { ASTStat $1 }
+    | def SEMIC cmds { ASTDef($1,$3)}
 ;
 
 stat:
@@ -46,7 +46,7 @@ def:
 
 types:
     type { [$1] }
-    |  type STAR types { $1:: $3 }
+    |  type STAR types { $1::$3 }
 ; 
 type:
     BOOL { ASTBool }
@@ -60,20 +60,20 @@ arg:
 
 args : 
     arg { [$1] }
-    | arg COMMA args { $1:: $3 }
+    | arg COMMA args { $1::$3 }
 ;
 
 expr:
     NUM { ASTNum($1)}
 |   IDENT { ASTId($1) }
+|   LPAR IF expr expr expr RPAR { ASTIf($3, $4, $5) }
+|   LPAR AND expr expr RPAR { ASTAnd($3, $4) }
+|   LPAR OR expr expr RPAR { ASTOr($3, $4) }
 |   LPAR expr exprs RPAR { ASTApp($2, $3) }
-|   AND expr expr { ASTAnd($2, $3) }
-|   OR expr expr { ASTOr($2, $3) }
-|   IF expr expr expr { ASTIf($2, $3, $4) }
 |   LBRA args RBRA expr { ASTLambda($2,$4) }
 ;
 
 exprs:
     expr { [$1] }
-|   expr exprs { $1:: $2 }
+|   expr exprs { $1::$2 }
 ;

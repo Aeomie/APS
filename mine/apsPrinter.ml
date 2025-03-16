@@ -134,25 +134,20 @@ let print_def d =
       Printf.printf")";
   )
 
-let print_cmd c = 
+let rec print_cmd c = 
   match c with
   | ASTStat s -> print_stat s
-  | ASTDef d -> print_def d
-
-let rec print_cmds cs = 
-  match cs with
-  | [] -> ()
-  | [c] -> print_cmd c
-  | c::cs -> (
-    print_cmd c;
+  | ASTDef(d,c) -> (
+    Printf.printf "ASTDef(";
+    print_def d;
+    print_char ')';
     print_char ',';
-    print_cmds cs;
-  )
-
+    print_cmd c;
+    )
 
 let print_prog p =
   Printf.printf"ASTProg([";
-  print_cmds p;
+  print_cmd p;
   Printf.printf"])"
 ;;
 

@@ -20,7 +20,7 @@ member((id(x),bool),NewG).
 is_init_env(G),bt_addtoE(G, id(x), int, TempG),member((id(x),int),TempG).
 is_init_env(G),bt_addtoE(G, id(x), int, TempG),member((id(x),int),TempG),writeln(TempG).
 
-is_init_env(G),bt_addtoE(G, "lol", int, TempG),bt_addtoE(TempG, "booka", int, newG),member((id("lol"),int),newG).
+is_init_env(G),bt_addtoE(G, "lol", int, TempG),bt_addtoE(TempG, "booka", int, newG),member((    id("lol"),int),newG).
 
 
 // checking or 
