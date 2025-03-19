@@ -149,9 +149,6 @@ bt_get_types([(_,T)|ARGS],[T|Result]):-
     bt_get_types(ARGS,Result).
 
 
-parcours(X, [(X,V)|_], V).
-parcours(X, [_|XS], V) :- parcours(X, XS, V).
-
 /*******END HELPER Functions**********/
 
 :-
