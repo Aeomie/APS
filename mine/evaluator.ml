@@ -26,7 +26,6 @@ let rec init env list =
 (* initialising environment*)
 let env = init env list
 
-
 (*
 General rules :
 InZ 1 , also plays the role of true.
@@ -44,6 +43,8 @@ let get_val ident env =
 (* expression evaluator*)
 let rec eval_expr e env = 
   match e with
+  | ASTId("true")-> INZ(1)
+  | ASTId("false") -> INZ(0)
   | ASTNum n -> InZ n
   | ASTId s -> get_val s
   | ASTand (e1,e2) -> wrap and_ e1 e2 env
@@ -77,12 +78,26 @@ let eval_def def env =
     new_env
 
   | _ -> failwith "no such definition"
- 
 
+let eval_cmd cmd env output = 
+  match cmd with
+  | ASTStat stat -> eval_stat s env output
+  | ASTDef(d, cmds) -> let new_env = eval_def d env in
+  eval_cmd cmds new_env output
+  
+let eval_stat s env output = 
+  match s with 
+  | ASTEcho e -> (eval_expr e env )::output
+
+let eval_prog p env = 
+  print_output (eval_cmd p env [] )
+
+let print_output lst = 
+  List.iter print_endline lst
 (* init functions *)
 let not_op_func arg =
   match arg with
-  | InZ 0 -> inZ 1 
+  | InZ 0 -> InZ 1 
   | InZ _ -> InZ 0
   | _ -> assert false
 
@@ -131,8 +146,8 @@ let and_func args env =
 let or_func args env =
   match args with
   | [expr1; expr2] ->
-    if (eval_expr expr1 env) = Inz 1 then 
-      Inz(1)
+    if (eval_expr expr1 env) = InZ 1 then 
+      InZ(1)
     else
       eval_expr expr2
   | _ -> failwith "Invalid arguments for or operation"
@@ -186,7 +201,6 @@ let eval_app f args env =
 
 let eval_lambda params expr env=
     InF(expr, params, env)
-
   (* the checks for inZ are inside the functions *)
 
 let prim ident args = 
@@ -200,20 +214,18 @@ let prim ident args =
 let prim1 arg = not_op arg;
 let prim2 ident arg1 arg2 = 
   match ident with
-  | eq -> eq_func [arg1::arg2]
-  | lt -> lt_func [arg1::arg2]
-  | add -> add_func [arg1::arg2]
-  | sub -> sub_func [arg1::arg2]
-  | mul -> mul_func [arg1::arg2]
-  | div -> div_func [arg1::arg2]
+  | eq -> eq_func [arg1;arg2]
+  | lt -> lt_func [arg1;arg2]
+  | add -> add_func [arg1;arg2]
+  | sub -> sub_func [arg1;arg2]
+  | mul -> mul_func [arg1;arg2]
+  | div -> div_func [arg1;arg2]
   | _ -> failwith "Invalid function name"
-
 
 let wrap ident arg1 arg2 env = 
   match ident with
-  | and_ -> and_func [arg1::arg2] env
-  | or_ -> or_func [arg1::arg2] env
-  | _ -> failwith "incorrect call to wrap 1"
+  | and_ -> and_func [arg1;arg2] env
+  | or_ -> or_func [arg1;arg2] env
 
 (* wrapper for 3 parameters *)
 let wrap2 ident arg1 arg2 arg3 env =
@@ -253,14 +265,25 @@ let rec check_expr e =
   |Some _ -> true
   |None -> false
 
-
 let rec eval_ttype typ =
-match typ with
-|ASTBool b -> 
-  if b = true then InZ 1
-  else InZ 0
-|ASTInt i-> intZ(num_of_int n)
-|ASTArrow list ->
-  match list with
-  |[] -> 
-  |t::rest -> (eval_ttype t) :: (eval_ttype rest)
+  match typ with
+    |ASTBool b -> 
+      if b = true then InZ 1
+      else InZ 0
+    |ASTInt i-> InZ(num_of_int n)
+    |ASTArrow list ->
+      match list with
+      |[] -> []
+      |t::rest -> (eval_ttype t) :: (eval_ttype rest)
+
+
+let fname = Sys.argv.(1) in
+let ic = open_in fname in
+try
+  let lexbuf = Lexing.from_channel ic in
+  let p = Parser.prog Lexer.token lexbuf in
+    eval_prog p env;
+    print_string "Evaluator.\n"
+with Lexer.Eof ->
+  exit 0
+        
