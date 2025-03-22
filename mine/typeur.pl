@@ -73,7 +73,7 @@ bt_stat(G, echo(E),void) :-
 
 /************EXPRESSIONS**************/
 
-% num
+%num
 bt_expr(_,num(X),int):-
     write('in Num '),write(X),nl,
     integer(X).
