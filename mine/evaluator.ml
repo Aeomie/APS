@@ -104,6 +104,19 @@ let rec eval_expr e env =
   | ASTId("false") -> InZ(0)
   | ASTNum n -> InZ n
   | ASTId s -> get_val s env
+  | ASTAnd(expr1,expr2) ->
+     if(eval_expr expr1 env) = InZ 0 
+     then InZ 0
+     else eval_expr expr2 env
+  | ASTOr(expr1,expr2) ->
+    if(eval_expr expr1 env) = InZ 1
+      then InZ 1
+    else eval_expr expr2 env
+  | ASTIf(condition,body,alternate)->
+    if(eval_expr condition env) = InZ 1 then
+      eval_expr body env
+    else
+      eval_expr alternate env
   | _ ->  failwith " Unknown expression"
 ;;
 

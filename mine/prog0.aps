@@ -1,1 +1,1 @@
-[ ECHO 42 ]
+[ ECHO (if false 1 2) ]

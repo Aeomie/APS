@@ -224,13 +224,13 @@ let prim2 ident arg1 arg2 =
 
 let wrap ident arg1 arg2 env = 
   match ident with
-  | and_ -> and_func [arg1;arg2] env
-  | or_ -> or_func [arg1;arg2] env
+  | `and_ -> and_func [arg1;arg2] env
+  | `or_ -> or_func [arg1;arg2] env
 
 (* wrapper for 3 parameters *)
 let wrap2 ident arg1 arg2 arg3 env =
   match ident with
-  | if_ -> if_func [arg1::arg2::arg3] env
+  | `if_ -> if_func [arg1::arg2::arg3] env
   | _ -> failwith "incorrect call to wrap 2 "
 
 
