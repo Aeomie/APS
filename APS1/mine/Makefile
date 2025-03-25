@@ -7,12 +7,18 @@
 # === Fichier: Makefile                                                       ==
 # ==============================================================================
 
-LEX_ML = ocamllex
-YACC_ML = /usr/local/bin/ocamlyacc
-OCAMLC = ocamlc
+LEX_ML = /usr/bin/ocamllex
+YACC_ML = /usr/bin/ocamlyacc
+OCAMLC = /usr/bin/ocamlc
+
+all: prologTerm apsPrinter Evaluator
 
 prologTerm: parser prologTerm.ml
 	$(OCAMLC) -o prologTerm ast.cmo lexer.cmo parser.cmo prologTerm.ml
+Evaluator: parser evaluator.ml
+	$(OCAMLC) -o evaluator ast.cmo lexer.cmo parser.cmo evaluator.ml
+apsPrinter: parser apsPrinter.ml
+	$(OCAMLC) -o apsPrinter ast.cmo lexer.cmo parser.cmo apsPrinter.ml
 
 parser: ast.ml lexer.mll parser.mly
 	$(OCAMLC) -c ast.ml
@@ -26,6 +32,8 @@ clean:
 	rm -f *.cmo
 	rm -f *.cmi
 	rm -f prologTerm
+	rm -f evaluator
+	rm -f aps_Printer	
 	rm -f lexer.ml
 	rm -f parser.mli
 	rm -f parser.ml

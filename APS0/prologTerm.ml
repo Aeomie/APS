@@ -8,12 +8,13 @@ let rec print_type t =
   | ASTBool -> Printf.printf"bool"
   | ASTInt -> Printf.printf"int"
   | ASTArrow (typs,typ) -> (
-    print_type typ;
-    print_char ',';
+    Printf.printf("fun(");
     print_char '[';
     print_types typs;
     print_char ']';
-    Printf.printf ")";
+    print_char ',';
+    print_type typ;
+    print_char ')';
   )
 
 and print_types ts = 

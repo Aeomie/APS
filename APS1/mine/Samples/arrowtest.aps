@@ -1,0 +1,1 @@
+[ FUN g int [x:int] (mul x 2);FUN f int [x: (int -> int), n:int] n; ECHO (f(g 2)) ]
