@@ -21,7 +21,28 @@ fi
 # Process files based on option
 if [ "$option" == "eval" ]; then
     for file in "${files[@]}"; do
-		echo "filename : $file"
-        ./evaluator "$file"
-    done
+	  ./evaluator "$file"
+    done	
+    echo "filename : $file"
+fi
+
+if [ "$option" == "typ" ]; then
+    for file in "${files[@]}"; do
+        echo "filename : $file"
+        echo "EXEC:"
+        echo "____________________________________________"
+	  ./prologTerm "$file" | swipl "typeur.pl"
+      echo "----------------------------------------------"
+      echo "----------------------------------------------"
+    done	
+fi
+
+if [ "$option" == "prolog" ]; then
+    for file in "${files[@]}"; do
+        echo "filename : $file"
+        echo "EXEC:"
+	  ./prologTerm "$file"
+      echo "----------------------------------------------"
+      echo "----------------------------------------------"
+    done	
 fi

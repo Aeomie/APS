@@ -2,7 +2,7 @@
 % ; is Or
 % Prog
 bt_prog(prog(Cs)) :-
-    %write('In prog : '),write(Cs),nl,
+    write('In prog : '),write(Cs),nl,
     is_init_env(G),
     bt_block(G,Cs,void).
 
@@ -25,13 +25,13 @@ is_init_env(G) :-
 bt_cmds(_, [], void).
 
 bt_cmds(G, [dec(X) | RestCmds], void) :-
-    %write('in cmds def : '),write(X), nl,
-    %write('rest : '),write(RestCmds),nl,
+    write('in cmds def : '),write(X), nl,
+    write('rest : '),write(RestCmds),nl,
     bt_defs(G, X, New_G),
     bt_cmds(New_G, RestCmds, void).
 
 bt_cmds(G, [Cmd | RestCmds], void) :-
-    %write('In cmds stat : '), write(Cmd), nl,
+    write('In cmds stat : '), write(Cmd), nl,
     bt_stat(G, Cmd, void),
     bt_cmds(G, RestCmds, void).
 
@@ -41,20 +41,20 @@ bt_cmds(G, [Cmd | RestCmds], void) :-
 
 %!   DEFS
 bt_defs(G,const(X,T,E),New_G):-
-    %write('In const : '),write(X),nl,
+    write('In const : '),write(X),nl,
     bt_expr(G,E,T),
     New_G = [(X,T) | G].
 
 
 bt_defs(G,fun(FuncName,T,Args,E), New_G) :-
-    %write('In func : '),write(FuncName),nl,
+    write('In func : '),write(FuncName),nl,
     append(Args,G,G_Temp),
     bt_expr(G_Temp,E,T), % type T to expression
     bt_get_types(Args, Result),
     New_G = [(FuncName,fun(Result,T))| G].
 
 bt_defs(G,funRec(FuncName, T, Args, E), New_G) :-
-    %write('In funcRec : '),write(FuncName),nl,
+    write('In funcRec : '),write(FuncName),nl,
     append(Args, G, G_Temp),
     bt_get_types(Args, Result),
     G_Temp2 = [(FuncName, fun(Result, T)) | G_Temp],
@@ -65,14 +65,14 @@ bt_defs(G,var(Var,T),New_G):-
     New_G = [(Var,T) | G].
 
 bt_defs(G, proc(ProcName, Args, Body), New_G) :-
-    %write('In Proc : '), write(ProcName), nl,
+    write('In Proc : '), write(ProcName), nl,
     append(Args, G, G_Temp),
     bt_get_types(Args, Result),
     bt_block(G_Temp, Body, void),
     New_G = [(ProcName, fun(Result,  void)) | G].
 
 bt_defs(G, procRec(ProcName, Args,Body), New_G):-
-    %write('In Proc Rec : '), write(ProcName), nl,
+    write('In Proc Rec : '), write(ProcName), nl,
     append(Args,G,G_Temp),
     bt_get_types(Args,Result),
     G_Temp2 = [(ProcName, fun(Result, void)) | G_Temp],
@@ -83,11 +83,10 @@ bt_defs(G, procRec(ProcName, Args,Body), New_G):-
 /*******INSTRUCTIONS*******/
 
 bt_stat(G, echo(E),void) :-
-    %write('In stat : '),write(E),nl,
+    write('In stat : '),write(E),nl,
     bt_expr(G, E, int).
 
-bt_stat(G,set(IdVar, Expr),void):-
-    bt_expr(G,Expr,T),
+bt_stat(G,set(IdVar,T),void):-
     bt_expr(G,IdVar,T).
 
 bt_stat(G,ifblock(Cond,Body,Alt),void):-
@@ -99,14 +98,10 @@ bt_stat(G,while(Cond,Body),void):-
     bt_expr(G, Cond, bool),
     bt_block(G, Body,void).
 
-bt_stat(G,call(IdVar,Args),void):-
-    %write("in call"),nl,
-    bt_expr(G,IdVar,fun(ArgsTypes,void)),
-    %write(T),nl,
-    %write(ArgsTypes),nl,
-    %write("Args : ") , write(Args),nl,
-    bt_compareArgs(G,Args,ArgsTypes).
-
+bt_stat(G,call(IdVar,Exprs),void):-
+    write("in call"),nl,
+    bt_expr(G,IdVar,T),
+    write(T),nl.
 
 
 /****** END INSTRUCTIONS********/
@@ -115,54 +110,54 @@ bt_stat(G,call(IdVar,Args),void):-
 
 %num
 bt_expr(_,num(X),int):-
-    %write('in Num '),write(X),nl,
+    write('in Num '),write(X),nl,
     integer(X).
 
 %id
 bt_expr(G,id(X),T) :-
-    %write('in ID : '), write(X),nl,
+    write('in ID : '), write(X),nl,
     member((X,T),G).
 
 %if
 bt_expr(G,if(E1,E2,E3),T):-
-    %write('in If : '),nl,
-    %write('cond : '), write(E1),nl,
-    %write('body: '), write(E2),nl,
-    %write('alternant : '), write(E3),nl,
+    write('in If : '),nl,
+    write('cond : '), write(E1),nl,
+    write('body: '), write(E2),nl,
+    write('alternant : '), write(E3),nl,
     bt_expr(G,E1,bool),
     bt_expr(G,E2,T),
     bt_expr(G,E3,T).
 
 %and
 bt_expr(G,and(E1,E2), bool) :-
-    %write('in And : '),nl,
-    %write('Left: '), write(E1),nl,
-    %write('Right: '), write(E2),nl,
+    write('in And : '),nl,
+    write('Left: '), write(E1),nl,
+    write('Right: '), write(E2),nl,
     bt_expr(G,E1,bool),
     bt_expr(G,E2,bool).
 
 %or
 bt_expr(G,or(E1,E2),bool):-
-    %write('in Or : '),nl,
-    %write('Left: '), write(E1),nl,
-    %write('Right: '), write(E2),nl,
+    write('in Or : '),nl,
+    write('Left: '), write(E1),nl,
+    write('Right: '), write(E2),nl,
     bt_expr(G,E1,bool),
     bt_expr(G,E2,bool).
 
 % Lambda
 bt_expr(G,lambda(Args,E),fun(Result,T)):-
-    %write('in Lambda '),nl,
+    write('in Lambda '),nl,
     append(Args,G,New_G),
     bt_get_types(Args,Result),
     bt_expr(New_G,E,T).
 
 %app
 bt_expr(G, app(E,Args),T):-
-    %write('in App '),nl,
-    %write('Expression : '),write(E),nl,
-    %write('Args : '), write(Args),nl,
-    %write('Environment : ' ), write(G),nl,
-    %write('Type T : '),write(T),nl,
+    write('in App '),nl,
+    write('Expression : '),write(E),nl,
+    write('Args : '), write(Args),nl,
+    write('Environment : ' ), write(G),nl,
+    write('Type T : '),write(T),nl,
     bt_expr(G, E, fun(ArgsTypes,T)), %% checks if E is func, since it checks if E is of type fun
     bt_compareArgs(G,Args,ArgsTypes).
 
@@ -172,7 +167,7 @@ bt_expr(G, app(E,Args),T):-
 /***Block handle***/
 
 bt_block(G,block(Cs),void):-
-    %write("in block"),nl,
+    write("in block"),nl,
     bt_cmds(G,Cs,void).
 
 /***End of Block***/
@@ -181,7 +176,7 @@ bt_block(G,block(Cs),void):-
 %!  Func used to check if Arg type is correct
 bt_compareArgs(_,[],[]).
 bt_compareArgs(G, [Arg | RestArgs], [Type | RestTypes]):-
-    %write('in Compare args'),nl,
+    write('in Compare args'),nl,
     bt_expr(G,Arg,Type),
     bt_compareArgs(G,RestArgs,RestTypes).
 

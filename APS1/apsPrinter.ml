@@ -98,15 +98,42 @@ let rec print_expr e =
     )
 
 
-let print_stat s = 
+and print_stat s = 
   match s with
   | ASTEcho e -> (
       Printf.printf"ASTEcho(";
       print_expr e;
       Printf.printf")";
   )
+  | ASTSet(name, expr) -> (
+    Printf.printf"ASTSet(ASTId(%s),"name;
+    print_expr expr;
+    print_char ')';
+  )
+  | ASTIfB(cond,body,alt) -> (
+    Printf.printf"ASTIfB(";
+    print_expr cond;
+    print_char ',';
+    print_block body;
+    print_char ',';
+    print_block alt;
+    print_char ')';
+  )
+  | ASTWhile(cond,body) -> (
+    Printf.printf"ASTWhile(";
+    print_expr cond;
+    print_char ',';
+    print_block body;
+    print_char ')';
+  )
+  | ASTCall(ident,exprs) -> (
+    Printf.printf"ASTCall(ASTId(%s)"ident;
+    Printf.printf",[";
+    print_exprs exprs;
+    Printf.printf"])"; 
+  )
 
-let print_def d = 
+and print_def d = 
   match d with
   | ASTConst(str , ttype, expr) -> (
       Printf.printf"ASTConst( %s," str;
@@ -133,8 +160,31 @@ let print_def d =
       print_expr expr;
       Printf.printf")";
   )
+  | ASTVar(name, ttype) -> (
+    Printf.printf"ASTVar(%s,"name;
+    print_type ttype;
+    print_char ')';
+  )
+  | ASTProc(name, args, body) -> (
+    Printf.printf"ASTProc(%s,"name;
+    print_char '[';
+    print_args args;
+    print_char ']';
+    print_char ',';
+    print_block body;
+    print_char ')';
+  )
+  | ASTProcRec(name , args, body) -> (
+    Printf.printf"AstProcRec(%s,"name;
+    print_char '[';
+    print_args args;
+    print_char ']';
+    print_char ',';
+    print_block body;
+    print_char ')';
+  )
 
-let rec print_cmd c = 
+and print_cmd c = 
   match c with
   | ASTStat s -> print_stat s
   | ASTDef(d,c) -> (
@@ -144,11 +194,23 @@ let rec print_cmd c =
     print_char ',';
     print_cmd c;
     )
+  | ASTStatcmds(s,cd) -> (
+    print_stat s;
+    print_char ',';
+    print_cmd cd;
+  )
 
-let print_prog p =
-  Printf.printf"ASTProg([";
-  print_cmd p;
-  Printf.printf"])"
+and print_block b =
+  match b with
+  | ASTBlock cs -> (
+    Printf.printf"ASTBlock([";
+    print_cmd cs;
+    Printf.printf"])"
+  )
+and print_prog b =
+  Printf.printf"ASTProg(";
+  print_block b;
+  Printf.printf")"
 ;;
 
 let fname = Sys.argv.(1) in

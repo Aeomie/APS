@@ -1,14 +1,12 @@
 
 open Ast
 
-
-
 let rec print_type t =
   match t with
   | ASTBool -> Printf.printf"bool"
   | ASTInt -> Printf.printf"int"
   | ASTArrow (typs,typ) -> (
-    Printf.printf("fun(");
+    Printf.printf"fun(";
     print_char '[';
     print_types typs;
     print_char ']';
@@ -189,7 +187,13 @@ and print_def d =
     print_block body;
     print_char ')';
   )
-
+and print_block b =
+  match b with
+  | ASTBlock cs -> (
+    Printf.printf"block([";
+    print_cmd cs;
+    Printf.printf"])"
+  )
 and print_cmd c = 
   match c with
   | ASTStat s -> print_stat s
@@ -206,17 +210,9 @@ and print_cmd c =
     print_cmd cd;
   )
 
-and print_block b =
-  match b with
-  | ASTBlock cs -> (
-    Printf.printf"block([";
-    print_cmd cs;
-    Printf.printf"])"
-  )
-
-let print_prog b =
+let print_prog p =
   Printf.printf"prog(";
-  print_block b;
+  print_block p;
   Printf.printf")";
 ;;
 

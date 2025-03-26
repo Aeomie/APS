@@ -9,7 +9,9 @@
 
 %token SEMIC DP COMMA STAR ARROW
 
-%token CONST FUN REC ECHO IF AND OR BOOL INT
+%token CONST FUN REC VAR PROC
+%token ECHO SET IFB WHILE CALL
+%token IF AND OR BOOL INT
 
 %type <Ast.expr> expr
 %type <Ast.expr list> exprs
@@ -21,27 +23,40 @@
 %type <Ast.def> def
 %type <Ast.stat> stat
 
-%type <Ast.cmd> prog
+%type <Ast.block> block
+%type <Ast.block> prog
+
 %start prog
 
 %%
 prog: 
-    LBRA cmds RBRA { $2 }
+    block { $1 }
 ;
 
+block: 
+    LBRA cmds RBRA { ASTBlock($2)}
+;
 cmds:
     stat { ASTStat $1 }
     | def SEMIC cmds { ASTDef($1,$3)}
+    | stat SEMIC cmds { ASTStatcmds($1,$3)}
 ;
 
 stat:
     ECHO expr { ASTEcho($2) }
+    | SET IDENT expr { ASTSet($2,$3) }
+    | IFB expr block block { ASTIfB($2,$3,$4) }
+    | WHILE expr block { ASTWhile($2,$3) }
+    | CALL IDENT exprs { ASTCall($2,$3) }
 ;
 
 def:
     CONST IDENT type expr { ASTConst($2, $3 , $4) }
     | FUN IDENT type LBRA args RBRA expr { ASTFun($2, $3 , $5, $7) }
     | FUN REC IDENT type LBRA args RBRA expr { ASTFunRec($3, $4, $6, $8) }
+    | VAR IDENT type { ASTVar($2,$3)}
+    | PROC IDENT LBRA args RBRA block { ASTProc($2,$4,$6)}
+    | PROC REC IDENT LBRA args RBRA block { ASTProcRec($3,$5,$7)}
 ;
 
 types:
