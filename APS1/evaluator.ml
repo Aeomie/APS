@@ -1,18 +1,33 @@
 open Ast
 
 module StringMap = Map.Make(String)
-
 type value = 
   | InZ of int
   | InF of expr * string list * environment (* Here p is expr *)
   | InFR of expr * string * string list * environment (* Here p is expr *)
   | InP of string (* Contains the name of the function *)
-and environment = value StringMap.t;;
+  | InAddress of address
+  | InPr of block * string list *  environment
+  | InPrR of block * string * string list * environment
+  | None
+and environment = value StringMap.t
+and address = InA of int;;
 
-(* following this principal , tommorow add not lt mul div eq just like shown in the cours*)
+(* AddressMap definition*)
+module AddressMap = Map.Make(struct
+  type t = address
+  let compare = compare
+end
+)
+module PointerMap = Map.Make(String)
 
+type memMapT = value AddressMap.t
 
+let memory : memMapT ref  = ref AddressMap.empty
 let env : environment = StringMap.empty
+
+let global_ptr_cpt = ref 0
+
 
 let list = ["not"; "eq"; "lt"; "add"; "sub"; "mul"; "div"]
 
@@ -25,14 +40,6 @@ let rec init env list =
 
 (* initialising environment*)
 let env = init env list
-
-(*
-General rules :
-InZ 1 , also plays the role of true.
-InZ 0 plays the role of false
-
-*)
-
 
 (* init functions *)
 let not_op_func arg =
@@ -77,7 +84,21 @@ let get_val ident env =
   | None -> failwith ("No value for identifier: " ^ ident)
 ;;
 
+let get_val_from_memory ident =
+  match StringMap.find_opt ident pointerMap with
+  | Some add_val -> 
+    match StringMap.find_opt add_val memory with
+    | Some res -> res
+    | None -> failwith "Value doesnt exist in memory" 
+  | None -> failwith "Value doesnt exist in memory"
+  ;;
 
+let alloc = 
+  let allocation = InA(!global_ptr_cpt) in 
+  let memory = AddressMap.add (allocation) (None) !memory in
+  global_ptr_cpt := !global_ptr_cpt + 1;
+  allocation
+;;
 
 let rec add_variables_to_env (args : string list) (values : value list) ( env: environment)=
   let rec aux_add args vals res_env = 
@@ -127,11 +148,11 @@ let args_list_tostring arglist =
   in 
   aux_transform arglist [];; 
 (* expression evaluator*)
-let rec eval_expr e env = 
+let rec eval_expr e env memory = 
   match e with
   | ASTId("true")-> InZ(1)
   | ASTId("false") -> InZ(0)
-  | ASTNum n -> InZ n
+  | ASTNum n -> InZ n 
   | ASTId s -> get_val s env
   | ASTAnd(expr1,expr2) ->
      if(eval_expr expr1 env) = InZ 0 
@@ -224,8 +245,13 @@ let rec eval_cmd cmd env output =
     eval_cmd cmds new_env output
 ;;
 
-let eval_prog p env = 
-  print_output (eval_cmd p env [] )
+let eval_block b env output = 
+  match b with
+  | ASTBlock cmd -> eval_cmd cmd env output
+;;
+
+let eval_prog block env = 
+  print_output (eval_block block env [] )
 ;;
 
 let fname = Sys.argv.(1) in
