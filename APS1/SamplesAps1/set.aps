@@ -1,1 +1,1 @@
-[ CONST monkey int 3; SET monkey 8 ;ECHO monkey ]
+[ VAR monkey int; SET monkey 8 ;ECHO monkey ]

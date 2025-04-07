@@ -1,1 +1,1 @@
-[ VAR monkey int ; ECHO 10 ]
+[ VAR monkey int ; ECHO 6 ]
