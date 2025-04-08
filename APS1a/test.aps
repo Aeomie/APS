@@ -1,0 +1,1 @@
+[ PROC REC f [x:int, var y:int] [ECHO 1]; ECHO 10]

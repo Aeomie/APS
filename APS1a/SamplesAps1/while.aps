@@ -1,0 +1,1 @@
+[ VAR monkey int; SET monkey 1; WHILE (lt monkey 5) [ ECHO monkey; SET monkey (add monkey 1)] ]
