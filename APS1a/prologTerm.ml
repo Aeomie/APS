@@ -54,7 +54,7 @@ let print_argp a =
     Printf.printf")";
   )
   | ASTArgPAddress(name, t) -> (
-    Printf.printf"(%s,"name;
+    Printf.printf"var(%s,"name;
     print_type t;
     Printf.printf")";
   )

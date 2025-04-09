@@ -62,19 +62,20 @@ bt_defs(G,funRec(FuncName, T, Args, E), New_G) :-
     New_G = [(FuncName, fun(Result, T)) | G].
 
 bt_defs(G,var(Var,T),New_G):-
-    New_G = [(Var,T) | G].
+    write("in Var "),write(Var),write(' type: '),write(T),
+    New_G = [(Var,ref(T)) | G],write(New_G).
 
 bt_defs(G, proc(ProcName, Args, Body), New_G) :-
     %write('In Proc : '), write(ProcName), nl,
     append(Args, G, G_Temp),
-    bt_get_types(Args, Result),
+    bt_get_typesP(Args, Result),
     bt_block(G_Temp, Body, void),
     New_G = [(ProcName, fun(Result,  void)) | G].
 
 bt_defs(G, procRec(ProcName, Args,Body), New_G):-
     %write('In Proc Rec : '), write(ProcName), nl,
     append(Args,G,G_Temp),
-    bt_get_types(Args,Result),
+    bt_get_typesP(Args,Result),
     G_Temp2 = [(ProcName, fun(Result, void)) | G_Temp],
     bt_block(G_Temp2, Body, void),
     New_G = [(ProcName, fun(Result,void)) |G].
@@ -83,12 +84,13 @@ bt_defs(G, procRec(ProcName, Args,Body), New_G):-
 /*******INSTRUCTIONS*******/
 
 bt_stat(G, echo(E),void) :-
-    %write('In stat : '),write(E),nl,
+    write('In Echo : '),write(E),nl,
     bt_expr(G, E, int).
 
-bt_stat(G,set(IdVar, Expr),void):-
+bt_stat(G,set(id(Var), Expr),void):-
     bt_expr(G,Expr,T),
-    bt_expr(G,IdVar,T).
+    write('In stat '),write(Var),write(T),nl,
+    bt_exprp(G,adr(Var),ref(T)).
 
 bt_stat(G,ifblock(Cond,Body,Alt),void):-
     bt_expr(G, Cond , bool),
@@ -100,12 +102,11 @@ bt_stat(G,while(Cond,Body),void):-
     bt_block(G, Body,void).
 
 bt_stat(G,call(IdVar,Args),void):-
-    %write("in call"),nl,
+    write("in call"),nl,
     bt_expr(G,IdVar,fun(ArgsTypes,void)),
-    %write(T),nl,
-    %write(ArgsTypes),nl,
-    %write("Args : ") , write(Args),nl,
-    bt_compareArgs(G,Args,ArgsTypes).
+    write('ArgTypes: '),write(ArgsTypes),nl,
+    write("Args : ") , write(Args),nl,
+    bt_compareArgsP(G,Args,ArgsTypes).
 
 
 
@@ -122,6 +123,10 @@ bt_expr(_,num(X),int):-
 bt_expr(G,id(X),T) :-
     %write('in ID : '), write(X),nl,
     member((X,T),G).
+
+bt_expr(G,id(X),T):-
+    % checks if its type ref
+    member((X,ref(T)),G).
 
 %if
 bt_expr(G,if(E1,E2,E3),T):-
@@ -169,6 +174,19 @@ bt_expr(G, app(E,Args),T):-
 
 /*************END EXPRESSIONS***************/
 
+/*************START PROC EXPR***************/
+
+bt_exprp(G,adr(X),ref(T)):-
+    write('In exprp '),write(X),write(' type: '),write(T),
+    bt_expr(G,id(X),ref(T)).
+
+bt_exprp(G,X,T) :-
+    bt_expr(G,X,T).
+
+
+/*************END PROC EXPR***************/
+
+
 /***Block handle***/
 
 bt_block(G,block(Cs),void):-
@@ -178,12 +196,23 @@ bt_block(G,block(Cs),void):-
 /***End of Block***/
 /*******HELPER Functions**********/
 
+%Args
+%
 %!  Func used to check if Arg type is correct
 bt_compareArgs(_,[],[]).
 bt_compareArgs(G, [Arg | RestArgs], [Type | RestTypes]):-
     %write('in Compare args'),nl,
     bt_expr(G,Arg,Type),
     bt_compareArgs(G,RestArgs,RestTypes).
+
+%ArgP
+bt_compareArgsP(_, [], []).
+bt_compareArgsP(G, [Argp | RestArgsp], [Type | RestTypes]):-
+    %in compareargsP
+    write('Arg: '),write(Argp),nl,
+    write('Type: '),write(Type),nl,
+    bt_exprp(G,Argp,Type),
+    bt_compareArgsP(G,RestArgsp,RestTypes).
 
 % Debug func , just to add to Environment
 bt_addtoE(G, X, T,[(X,T) | G]).
@@ -194,6 +223,13 @@ bt_get_types([],[]). % to stop the recursive call
 bt_get_types([(_,T)|ARGS],[T|Result]):-
     bt_get_types(ARGS,Result).
 
+bt_get_typesP([],[]).
+
+bt_get_typesP([(_,T) | ARGS], [T|Result]):-
+    bt_get_typesP(ARGS,Result).
+
+bt_get_typesP([var(_,T) | ARGS], [ref(T)|Result]):-
+    bt_get_typesP(ARGS,Result).
 
 /*******END HELPER Functions**********/
 
