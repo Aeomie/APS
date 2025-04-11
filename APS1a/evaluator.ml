@@ -105,15 +105,15 @@ let get_bool_val v =
   | _ -> failwith "Not a boolean val"
 
 let rec add_variables_to_env (args : string list) (values : value list) ( env: environment)=
-let rec aux_add args vals res_env = 
-  match args,vals with
-  | [], [] -> res_env
-  | id :: rest_args , value::rest_values -> 
-    let res = StringMap.add id value res_env in
-    aux_add rest_args rest_values res
-  | _ -> failwith "Arguments mismatch in function"
-  in
-  aux_add args values env
+  let rec aux_add args vals res_env = 
+    match args,vals with
+    | [], [] -> res_env
+    | id :: rest_args , value::rest_values -> 
+      let res = StringMap.add id value res_env in
+      aux_add rest_args rest_values res
+    | _ -> failwith "Arguments mismatch in function"
+    in
+    aux_add args values env
 
 
 let args_list_tostring arglist = 
@@ -123,6 +123,15 @@ let args_list_tostring arglist =
     | ASTArg(ident,_)::td -> aux_transform td (ident::res)
   in 
   aux_transform arglist [];; 
+
+let argsp_list_tostring argplist = 
+  let rec aux_transform argp_list res =
+    match argp_list with
+    | [] -> List.rev res
+    | ASTArgP(ident,_)::td -> aux_transform td (ident::res)
+    | ASTArgPAddress(ident,_)::td -> aux_transform td (ident::res)
+  in
+  aux_transform argplist [];;
 
 let print_int_value value =
   match value with
@@ -203,6 +212,23 @@ and eval_exprs es env memory =
     let value = eval_expr e env memory in
     value::eval_exprs exprs env memory
 
+and eval_exprp expr env memory = 
+  match expr with
+  | ASTExpr e -> eval_expr e env memory
+  | ASTExprAddress ident -> 
+    let value = get_val ident env in
+    match value with
+    | InAddress a -> InAddress a
+    | _ -> failwith ("ident isn't of Address value, ident: " ^ ident)
+    
+
+and eval_exprsp exprsp env memory = 
+  match exprsp with
+  | [] -> []
+  | exprp :: rest_exprsp ->
+    let value = eval_exprp exprp env memory in
+    value::eval_exprsp rest_exprsp env memory
+
 and eval_app expr expressions env memory =
   let new_v = eval_expr expr env memory in 
   let arg_values = eval_exprs expressions env memory in 
@@ -249,14 +275,14 @@ and eval_def def env memory =
     let new_env = StringMap.add ident (InAddress address) env in
     (new_env,new_mem)
 
-  | ASTProc(ident,arg_list, block) ->
-    let new_args = args_list_tostring arg_list in
+  | ASTProc(ident,argp_list, block) ->
+    let new_args = argsp_list_tostring argp_list in
     let new_val = InP(block, new_args, env) in
     let new_env = StringMap.add ident new_val env in
     (new_env,memory)
 
-  | ASTProcRec(ident,arg_list,block) ->
-    let new_args = args_list_tostring arg_list in
+  | ASTProcRec(ident,argp_list,block) ->
+    let new_args = argsp_list_tostring argp_list in
     let new_val = InPR(block, ident, new_args , env) in
     let new_env = StringMap.add ident new_val env in 
     (new_env,memory)
@@ -295,8 +321,8 @@ and eval_stat s env memory output =
       let (final_mem , final_output) = eval_stat s env new_mem new_output in
       (final_mem, final_output)
   
-  | ASTCall (ident, exprs) -> 
-    let arg_values = eval_exprs exprs env memory in
+  | ASTCall (ident, exprsp) -> 
+    let arg_values = eval_exprsp exprsp env memory in
     let proc = get_val ident env in
    (match proc with
     | InP(body,params,proc_env) ->
