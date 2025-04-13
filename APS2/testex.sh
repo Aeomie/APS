@@ -48,3 +48,13 @@ if [ "$option" == "prologTerm" ]; then
       echo "----------------------------------------------"
     done	
 fi
+
+if [ "$option" == "apsPrinter" ]; then
+    for file in "${files[@]}"; do
+        echo "filename : $file"
+        echo "EXEC:"
+	  ./apsPrinter "$file"
+      echo "----------------------------------------------"
+      echo "----------------------------------------------"
+    done	
+fi
