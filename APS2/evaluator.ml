@@ -7,11 +7,13 @@ type value =
   | InFR of expr * string * string list * environment (* Here p is expr *)
   | InPrim of string (* Contains the name of the function *)
   | InAddress of address
+  | InB of bloc
   | InP of block * string list *  environment
   | InPR of block * string * string list * environment
   | None
 and environment = value StringMap.t
-and address = InA of int;;
+and address = InA of int
+and bloc = InB of address * int;;
 
 (* AddressMap definition*)
 module AddressMap = Map.Make(struct
@@ -176,49 +178,68 @@ let wrap ident args env =
 (* expression evaluator*)
 let rec eval_expr e env memory = 
   match e with
-  | ASTId("true")-> InZ(1)
-  | ASTId("false") -> InZ(0)
-  | ASTNum n -> InZ n 
+  | ASTId("true")-> (InZ(1),memory)
+  | ASTId("false") -> (InZ(0),memory)
+  | ASTNum n -> (InZ(n),memory)
   | ASTId s -> 
     let value = (get_val s env) in
     (match value with
-    | InAddress a -> get_val_from_memory a memory
-    | v -> v
+    | InAddress a ->
+      let value = get_val_from_memory a memory in
+      (value,memory)
+    | v -> (v,memory)
     )
   | ASTAnd(expr1,expr2) ->
-     if(eval_expr expr1 env memory) = InZ 0 
-     then InZ 0
-     else eval_expr expr2 env memory
+    let (left_value,new_mem) = eval_expr expr1 env memory in 
+    let left_res = get_bool_val left_value in
+     if (not left_res)
+     then (InZ 0, new_mem)
+     else 
+      let (right_value, final_mem) = eval_expr expr2 env new_mem in
+      (right_value, final_mem)
   | ASTOr(expr1,expr2) ->
-    if(eval_expr expr1 env memory) = InZ 1
-      then InZ 1
-    else eval_expr expr2 env memory
+    let (left_value , new_mem) = eval_expr expr1 env memory in
+    let left_res = get_bool_val left_value in
+    if(left_res)
+      then (InZ 1, new_mem)
+    else
+      let (right_value , final_mem) = eval_expr expr2 env new_mem in
+      (right_value , final_mem)
   | ASTIf(condition,body,alternate)->
-    let value = eval_expr condition env memory in
+    let (value, new_mem) = eval_expr condition env memory in
     let cond = get_bool_val value in
     if(cond) then
-      eval_expr body env memory
+      let (body_val , final_mem) = eval_expr body env new_mem in
+      (body_val , final_mem)
     else
-      eval_expr alternate env memory
-  | ASTApp(expr , exprs) -> eval_app expr exprs env memory
+      let (alt_val, final_mem) = eval_expr alternate env new_mem in
+      (alt_val, final_mem)
+  | ASTApp(expr , exprs) ->
+     let (eval_val , new_mem) = eval_app expr exprs env memory in
+     (eval_val, new_mem)
   | ASTLambda(args, e) ->
     let new_args = args_list_tostring args in
-    eval_lambda new_args e env
+    let value = eval_lambda new_args e env in
+    (value, memory)
 
 and eval_exprs es env memory = 
   match es with 
-  | [] -> []
+  | [] -> ([],memory)
   | e::exprs -> 
-    let value = eval_expr e env memory in
-    value::eval_exprs exprs env memory
+    let (value, new_mem) = eval_expr e env memory in
+    let (values , final_mem) = eval_exprs exprs env memory in
+    (value::values, final_mem)
 
 and eval_exprp expr env memory = 
   match expr with
-  | ASTExpr e -> eval_expr e env memory
+  | ASTExpr e -> 
+    let (value, new_mem) = eval_expr e env memory in
+    (value,new_mem)
   | ASTExprAddress ident -> 
     let value = get_val ident env in
     match value with
-    | InAddress a -> InAddress a
+    | InAddress a ->
+       (InAddress a, memory)
     | _ -> failwith ("ident isn't of Address value, ident: " ^ ident)
     
 
@@ -230,22 +251,24 @@ and eval_exprsp exprsp env memory =
     value::eval_exprsp rest_exprsp env memory
 
 and eval_app expr expressions env memory =
-  let new_v = eval_expr expr env memory in 
-  let arg_values = eval_exprs expressions env memory in 
+  let (new_v, _mem) = eval_expr expr env memory in (* func name *)
+  let (arg_values, _mem2) = eval_exprs expressions env memory in 
   match new_v with
   | InPrim id ->
     if List.length expressions > 2 then
       failwith "Not the right args for the inP, no more than 2"
     else
-      wrap id arg_values env  (* Reversing the list to maintain original order *)
-
+      let value = wrap id arg_values env  in (* Reversing the list to maintain original order *)
+      (value,memory)
   | InF (body, params, env_fun) ->
       let new_env = add_variables_to_env params arg_values env_fun in
-      eval_expr body new_env memory 
+      let (fun_val , final_mem) = eval_expr body new_env memory in
+      (fun_val , final_mem)
   | InFR (body, ident, params, env_fun) -> 
         let rec_env = StringMap.add ident (InFR (body, ident, params, env)) env_fun in
         let new_env = add_variables_to_env params arg_values rec_env in
-        eval_expr body new_env memory
+        let (funR_val , final_mem) = eval_expr body new_env memory in
+        (funR_val , final_mem)
   | _ -> failwith"Not an existing app"
 
 and eval_lambda params expr env =
@@ -254,9 +277,9 @@ and eval_lambda params expr env =
 and eval_def def env memory =
   match def with
   | ASTConst (ident, ttype, expr) ->
-      let new_val = eval_expr expr env memory in
+      let (new_val, new_mem) = eval_expr expr env memory in
       let new_env = StringMap.add ident new_val env in  (* Correctly update env *)
-      (new_env ,memory)
+      (new_env , new_mem)
 
   | ASTFun (ident, ttype, arg_list, expr) ->
       let new_args = args_list_tostring arg_list in 
@@ -290,32 +313,32 @@ and eval_def def env memory =
 and eval_stat s env memory output = 
   match s with 
   | ASTEcho e -> 
-      let new_val = eval_expr e env memory in 
-      (memory, new_val :: output)
+      let (new_val,new_mem) = eval_expr e env memory in 
+      (new_mem, new_val :: output)
   | ASTSet(var, expr) ->
-      let new_val = eval_expr expr env memory in
+      let (new_val, new_mem) = eval_expr expr env memory in
       let address = get_val var env in
       (match address with
       | InAddress ad ->
-          let new_mem = add_val_to_memory new_val ad memory in
-          (new_mem, output)
+          let final_mem = add_val_to_memory new_val ad new_mem in
+          (final_mem, output)
       | _ -> failwith "Not a valid variable")
 
   | ASTIfB(condition, body, alt) ->
-    let value = eval_expr condition env memory in
+    let (value , new_mem) = eval_expr condition env memory in
     let cond = get_bool_val value in
     if(cond)then
-      let (new_mem, new_output) = eval_block body env memory output in
-      (new_mem, new_output)
+      let (final_mem, new_output) = eval_block body env new_mem output in
+      (final_mem, new_output)
     else
-      let (new_mem, new_output) = eval_block alt env memory output in
-      (new_mem, new_output)
+      let (final_mem, new_output) = eval_block alt env new_mem output in
+      (final_mem, new_output)
 
   | ASTWhile(condition , body) ->
-    let value = eval_expr condition env memory in
+    let (value,new_mem) = eval_expr condition env memory in
     let cond = get_bool_val value in
     if (not cond) then
-      (memory, output)
+      (new_mem, output)
     else
       let (new_mem, new_output) = eval_block body env memory output in
       let (final_mem , final_output) = eval_stat s env new_mem new_output in
