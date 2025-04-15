@@ -67,7 +67,7 @@ let rec init env list =
 (* alloc memory*)
 let alloc mem = 
   let allocation = InA(!global_ptr_cpt) in 
-  let memory = AddressMap.add (allocation) (None) mem in
+  let memory = AddressMap.add (allocation) (InZ 0) mem in
   global_ptr_cpt := !global_ptr_cpt + 1;
   (allocation,memory);;
 

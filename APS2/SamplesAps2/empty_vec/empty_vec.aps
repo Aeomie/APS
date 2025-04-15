@@ -1,0 +1,5 @@
+[
+    CONST tab (vec int) (alloc 2);
+    ECHO (nth tab 0);
+    ECHO (nth tab 1)
+]   
