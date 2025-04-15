@@ -42,6 +42,7 @@ bt_cmds(G, [Cmd | RestCmds], void) :-
 %!   DEFS
 bt_defs(G,const(X,T,E),New_G):-
     %write('In const : '),write(X),nl,
+    %write('Expr : '),write(E),nl,
     bt_expr(G,E,T),
     New_G = [(X,T) | G].
 
@@ -62,19 +63,21 @@ bt_defs(G,funRec(FuncName, T, Args, E), New_G) :-
     New_G = [(FuncName, fun(Result, T)) | G].
 
 bt_defs(G,var(Var,T),New_G):-
-    write("in Var "),write(Var),write(' type: '),write(T),
-    New_G = [(Var,ref(T)) | G],write(New_G).
+    %write("in Var "),write(Var),write(' type: '),write(T),
+    New_G = [(Var,ref(T)) | G].
 
 bt_defs(G, proc(ProcName, Args, Body), New_G) :-
     %write('In Proc : '), write(ProcName), nl,
-    append(Args, G, G_Temp),
+    bt_transformArgs(Args,New_Args),
+    append(New_Args, G, G_Temp),
     bt_get_typesP(Args, Result),
     bt_block(G_Temp, Body, void),
     New_G = [(ProcName, fun(Result,  void)) | G].
 
 bt_defs(G, procRec(ProcName, Args,Body), New_G):-
     %write('In Proc Rec : '), write(ProcName), nl,
-    append(Args,G,G_Temp),
+    bt_transformArgs(Args,New_Args),
+    append(New_Args, G, G_Temp),
     bt_get_typesP(Args,Result),
     G_Temp2 = [(ProcName, fun(Result, void)) | G_Temp],
     bt_block(G_Temp2, Body, void),
@@ -84,12 +87,11 @@ bt_defs(G, procRec(ProcName, Args,Body), New_G):-
 /*******INSTRUCTIONS*******/
 
 bt_stat(G, echo(E),void) :-
-    write('In Echo : '),write(E),nl,
+    %write('In Echo : '),write(E),nl,
     bt_expr(G, E, int).
 
 bt_stat(G,set(Lval, Expr),void):-
-    bt_expr(G,Expr,T),
-    write('In stat '),write(Lval),write(T),
+    bt_expr(G,Expr,_),
     bt_lval(G,Lval,_).
 
 bt_stat(G,ifblock(Cond,Body,Alt),void):-
@@ -102,10 +104,10 @@ bt_stat(G,while(Cond,Body),void):-
     bt_block(G, Body,void).
 
 bt_stat(G,call(IdVar,Args),void):-
-    write("in call"),nl,
+    %write("in call"),nl,
     bt_expr(G,IdVar,fun(ArgsTypes,void)),
-    write('ArgTypes: '),write(ArgsTypes),nl,
-    write("Args : ") , write(Args),nl,
+    %write('ArgTypes: '),write(ArgsTypes),nl,
+    %write("Args : ") , write(Args),nl,
     bt_compareArgsP(G,Args,ArgsTypes).
 
 
@@ -187,7 +189,7 @@ bt_expr(G,nth(Vec,Val),T):-
     bt_expr(G,Val,int).
 
 %Vset
-bt_expr(G,vset(Vec,Index,Val),vec(T)):-
+bt_expr(G,vset(Vec,Index,Val),T):-
     bt_expr(G,Vec,vec(T)),
     bt_expr(G,Index,int),
     bt_expr(G,Val,T).
@@ -198,7 +200,7 @@ bt_expr(G,vset(Vec,Index,Val),vec(T)):-
 /*************START PROC EXPR***************/
 
 bt_exprp(G,adr(X),ref(T)):-
-    write('In exprp '),write(X),write(' type: '),write(T),
+    %write('In exprp '),write(X),write(' type: '),write(T),
     bt_expr(G,id(X),ref(T)).
 
 bt_exprp(G,X,T) :-
@@ -238,11 +240,18 @@ bt_compareArgs(G, [Arg | RestArgs], [Type | RestTypes]):-
 bt_compareArgsP(_, [], []).
 bt_compareArgsP(G, [Argp | RestArgsp], [Type | RestTypes]):-
     %in compareargsP
-    write('Arg: '),write(Argp),nl,
-    write('Type: '),write(Type),nl,
+    %write('Arg: '),write(Argp),nl,
+    %write('Type: '),write(Type),nl,
     bt_exprp(G,Argp,Type),
     bt_compareArgsP(G,RestArgsp,RestTypes).
 
+%to transform Args from val(x,int) to (x,ref(int))
+bt_transformArgs([],[]).
+bt_transformArgs([(X,T) | RestArgs] , [(X,T) | Result]):-
+    bt_transformArgs(RestArgs, Result).
+bt_transformArgs([var(X,T) | RestArgs] , [(X,ref(T)) | Result]):-
+    bt_transformArgs(RestArgs, Result).
+    
 % Debug func , just to add to Environment
 bt_addtoE(G, X, T,[(X,T) | G]).
 
@@ -264,4 +273,17 @@ bt_get_typesP([var(_,T) | ARGS], [ref(T)|Result]):-
 
 :-
     read(Program),
-    bt_prog(Program).
+    catch(
+        (
+            (bt_prog(Program) ->
+                (write("Test passed"), nl, halt(0))
+            ;
+                throw('Program Failed')
+            )
+        ),
+        Warning,
+        (
+            write("Test failed: "), write(Warning), nl,
+            halt(1)
+        )
+    ).

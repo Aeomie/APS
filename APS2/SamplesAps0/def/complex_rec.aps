@@ -1,0 +1,1 @@
+[ FUN REC f int [x:int] (if (eq x 0) 2 (mul x (f (sub x 1)))) ; ECHO (f 4) ]

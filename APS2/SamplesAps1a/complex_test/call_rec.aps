@@ -1,0 +1,8 @@
+[VAR monkey int;
+ SET monkey 5;
+ PROC REC p [x:int, y:int, var v:int] [ ECHO (mul x y); ECHO v];
+CALL p 2 4 (adr monkey);
+ECHO monkey]
+
+
+

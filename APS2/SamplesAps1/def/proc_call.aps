@@ -1,0 +1,1 @@
+[ PROC f [x:int] [ECHO 1]; CALL f 10]
