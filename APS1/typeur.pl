@@ -199,4 +199,17 @@ bt_get_types([(_,T)|ARGS],[T|Result]):-
 
 :-
     read(Program),
-    bt_prog(Program).
+    catch(
+        (
+            (bt_prog(Program) ->
+                (write("Test passed"), nl, halt(0))
+            ;
+                throw('Program Failed')
+            )
+        ),
+        Warning,
+        (
+            write("Test failed: "), write(Warning), nl,
+            halt(1)
+        )
+    ).

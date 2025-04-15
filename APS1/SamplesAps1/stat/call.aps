@@ -1,0 +1,3 @@
+[ PROC p [x:int, y:int] [ ECHO (mul x y)]; CALL p 2 4]
+
+
