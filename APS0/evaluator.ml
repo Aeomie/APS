@@ -77,8 +77,6 @@ let get_val ident env =
   | None -> failwith ("No value for identifier: " ^ ident)
 ;;
 
-
-
 let rec add_variables_to_env (args : string list) (values : value list) ( env: environment)=
   let rec aux_add args vals res_env = 
     match args,vals with
@@ -234,7 +232,6 @@ let fname = Sys.argv.(1) in
     let lexbuf = Lexing.from_channel ic in
     let p = Parser.prog Lexer.token lexbuf in
       eval_prog p env;
-      print_string "Evaluator.\n"
   with Lexer.Eof ->
     exit 0
         

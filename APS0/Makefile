@@ -33,8 +33,7 @@ clean:
 	rm -f *.cmi
 	rm -f prologTerm
 	rm -f evaluator
-	rm -f aps_Printer	
+	rm -f apsPrinter	
 	rm -f lexer.ml
 	rm -f parser.mli
 	rm -f parser.ml
-	rm *~

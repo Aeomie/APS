@@ -2,7 +2,6 @@
 % ; is Or
 % Prog
 bt_prog(prog(Cs)) :-
-    write('In prog : '),write(Cs),nl,
     is_init_env(G),
     bt_cmds(G,Cs,void).
 
@@ -25,13 +24,13 @@ is_init_env(G) :-
 bt_cmds(_, [], void).
 
 bt_cmds(G, [dec(X) | RestCmds], void) :-
-    write('in cmds def : '),write(X), nl,
-    write('rest : '),write(RestCmds),nl,
+    %write('in cmds def : '),write(X), nl,
+    %write('rest : '),write(RestCmds),nl,
     bt_defs(G, X, New_G),
     bt_cmds(New_G, RestCmds, void).
 
 bt_cmds(G, [Cmd | RestCmds], void) :-
-    write('In cmds stat : '), write(Cmd), nl,
+    %write('In cmds stat : '), write(Cmd), nl,
     bt_stat(G, Cmd, void),
     bt_cmds(G, RestCmds, void).
 
@@ -41,20 +40,24 @@ bt_cmds(G, [Cmd | RestCmds], void) :-
 
 %!   DEFS
 bt_defs(G,const(X,T,E),New_G):-
-    write('In const : '),write(X),nl,
+    %write('In const : '),write(X),nl,
     bt_expr(G,E,T),
     New_G = [(X,T) | G].
 
 
 bt_defs(G,fun(FuncName,T,Args,E), New_G) :-
-    write('In func : '),write(FuncName),nl,
+    %write('In func : '),write(FuncName),nl,
+    %write('Type : '),write(T),nl,
+    %write('Args : '),write(Args),nl,
     append(Args,G,G_Temp),
+    %write('GTemp : '),write(G_Temp),nl,
     bt_expr(G_Temp,E,T), % type T to expression
     bt_get_types(Args, Result),
+    %write('Result : '),write(Result),nl,
     New_G = [(FuncName,fun(Result,T))| G].
 
 bt_defs(G,funRec(FuncName, T, Args, E), New_G) :-
-    write('In funcRec : '),write(FuncName),nl,
+    %write('In funcRec : '),write(FuncName),nl,
     append(Args, G, G_Temp),
     bt_get_types(Args, Result),
     G_Temp2 = [(FuncName, fun(Result, T)) | G_Temp],
@@ -66,7 +69,7 @@ bt_defs(G,funRec(FuncName, T, Args, E), New_G) :-
 /*******INSTRUCTIONS*******/
 
 bt_stat(G, echo(E),void) :-
-    write('In stat : '),write(E),nl,
+    %write('In stat : '),write(E),nl,
     bt_expr(G, E, int).
 
 /****** END INSTRUCTIONS********/
@@ -75,54 +78,53 @@ bt_stat(G, echo(E),void) :-
 
 %num
 bt_expr(_,num(X),int):-
-    write('in Num '),write(X),nl,
     integer(X).
 
 %id
 bt_expr(G,id(X),T) :-
-    write('in ID : '), write(X),nl,
+    %write('in ID : '), write(X),nl,
     member((X,T),G).
 
 %if
 bt_expr(G,if(E1,E2,E3),T):-
-    write('in If : '),nl,
-    write('cond : '), write(E1),nl,
-    write('body: '), write(E2),nl,
-    write('alternant : '), write(E3),nl,
+    %write('in If : '),nl,
+    %write('cond : '), write(E1),nl,
+    %write('body: '), write(E2),nl,
+    %write('alternant : '), write(E3),nl,
     bt_expr(G,E1,bool),
     bt_expr(G,E2,T),
     bt_expr(G,E3,T).
 
 %and
 bt_expr(G,and(E1,E2), bool) :-
-    write('in And : '),nl,
-    write('Left: '), write(E1),nl,
-    write('Right: '), write(E2),nl,
+    %write('in And : '),nl,
+    %write('Left: '), write(E1),nl,
+    %write('Right: '), write(E2),nl,
     bt_expr(G,E1,bool),
     bt_expr(G,E2,bool).
 
 %or
 bt_expr(G,or(E1,E2),bool):-
-    write('in Or : '),nl,
-    write('Left: '), write(E1),nl,
-    write('Right: '), write(E2),nl,
+    %write('in Or : '),nl,
+    %write('Left: '), write(E1),nl,
+    %write('Right: '), write(E2),nl,
     bt_expr(G,E1,bool),
     bt_expr(G,E2,bool).
 
 % Lambda
 bt_expr(G,lambda(Args,E),fun(Result,T)):-
-    write('in Lambda '),nl,
+    %write('in Lambda '),nl,
     append(Args,G,New_G),
     bt_get_types(Args,Result),
     bt_expr(New_G,E,T).
 
 %app
 bt_expr(G, app(E,Args),T):-
-    write('in App '),nl,
-    write('Expression : '),write(E),nl,
-    write('Args : '), write(Args),nl,
-    write('Environment : ' ), write(G),nl,
-    write('Type T : '),write(T),nl,
+    %write('in App '),nl,
+    %write('Expression : '),write(E),nl,
+    %write('Args : '), write(Args),nl,
+    %write('Environment : ' ), write(G),nl,
+    %write('Type T : '),write(T),nl,
     bt_expr(G, E, fun(ArgsTypes,T)), %% checks if E is func, since it checks if E is of type fun
     bt_compareArgs(G,Args,ArgsTypes).
 
@@ -135,13 +137,12 @@ bt_expr(G, app(E,Args),T):-
 %!  Func used to check if Arg type is correct
 bt_compareArgs(_,[],[]).
 bt_compareArgs(G, [Arg | RestArgs], [Type | RestTypes]):-
-    write('in Compare args'),nl,
+    %write('in Compare args'),nl,
     bt_expr(G,Arg,Type),
     bt_compareArgs(G,RestArgs,RestTypes).
 
 % Debug func , just to add to Environment
 bt_addtoE(G, X, T,[(X,T) | G]).
-
 
 % func that gets u the types from ARGS list
 bt_get_types([],[]). % to stop the recursive call
@@ -153,4 +154,18 @@ bt_get_types([(_,T)|ARGS],[T|Result]):-
 
 :-
     read(Program),
-    bt_prog(Program).
+    catch(
+        (
+            (bt_prog(Program) ->
+                (write("Test passed"), nl, halt(0))
+            ;
+                throw('Program Failed')
+            )
+        ),
+        Warning,
+        (
+            write("Test failed: "), write(Warning), nl,
+            halt(1)
+        )
+    ).
+

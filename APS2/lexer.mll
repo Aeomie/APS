@@ -6,7 +6,7 @@
 
 
 rule token = parse
-    | [' ' '\t' '\r' '\n'] { token lexbuf } (* skip blank *)
+    | [' ' '\t' '\r' '\n'] { token lexbuf } (* skip blank , jump lines*)
     | '[' { LBRA }
     | ']' { RBRA }
     | '(' { LPAR }
