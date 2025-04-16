@@ -65,7 +65,7 @@ En d'autres termes, dans l'évaluateur, il est possible d'afficher des valeurs b
 
 
 ### WSL
-Pour exécuter le programme en WSL, vous devez d'abord appeler ces commandes:
+Pour exécuter le programme dans WSL, vous devez d'abord appeler ces commandes:
 1. `sudo apt-get install dos2unix`
 2. `chmod +x exec.sh`
 3. `dos2unix exec.sh`
