@@ -21,7 +21,6 @@ module AddressMap = Map.Make(struct
   let compare = compare
 end
 )
-module PointerMap = Map.Make(String)
 
 type memMapT = value AddressMap.t
 
