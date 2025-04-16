@@ -13,6 +13,9 @@ Chaque partie d'APS contient un typeur,
 et un évaluateur, qui exécute le programme.
 
 ## Commandes
+Lors du build, il y aura un certain avertissement de cette forme :
+`| _ -> failwith "Vector size not well initialized"`.
+Cependant, j'ai décidé de le laisser, car cela sert de mécanisme de gestion d'erreur.<br>
 Pour la partie `Build` : il suffit d’exécuter `make` dans le terminal.<br>
 - Cela produira tous les fichiers de l’évaluateur, ainsi que le prologTerm (utilisé dans le typeur),
 requis pour exécuter les programmes. Pour nettoyer les fichiers après les tests, il suffit d’exécuter `make clean`.
@@ -59,3 +62,5 @@ Dans les tests, tous les tests devraient bien s'exécuter, sauf ceux qui se trou
 Cependant, certains d'entre eux s'exécutent dans l'évaluateur mais pas dans le typeur, car dans le typeur, on ne peut pas éxecuter `ECHO true`,
 contrairement à l'évaluateur où cela est possible.
 En d'autres termes, dans l'évaluateur, il est possible d'afficher des valeurs booléennes, mais ce n'est pas le cas dans le typeur
+
+
