@@ -54,3 +54,8 @@ Pour exécuter les tests de la version précédente,
 par exemple si vous êtes dans `APS 1` et que
 vous voulez les tester sur les tests de `APS 0`, il suffit d'appeler :
 - `./exec_prv.sh <option>`
+
+Dans les tests, tous les tests devraient bien s'exécuter, sauf ceux qui se trouvent dans le répertoire `FailTests`.
+Cependant, certains d'entre eux s'exécutent dans l'évaluateur mais pas dans le typeur, car dans le typeur, on ne peut pas éxecuter `ECHO true`,
+contrairement à l'évaluateur où cela est possible.
+En d'autres termes, dans l'évaluateur, il est possible d'afficher des valeurs booléennes, mais ce n'est pas le cas dans le typeur
