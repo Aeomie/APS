@@ -100,33 +100,3 @@ if [ "$option" == "prologTerm" ]; then
     done	
     echo "******* PrologTerm END *******"
 fi
-
-if [ "$option" == "apsPrinter" ]; then
-
-    echo "******* ApsPrinter START *******"
-    echo
-    for dir in "$folder"/*; do
-        if [ -d "$dir" ]; then
-            echo "*****>>> Entering folder: $dir*****"
-            for file in "$dir"/*.aps; do
-                [ -e "$file" ] || continue  # Skip if no .aps files
-                echo "filename : $file"
-                echo "Result: "
-                ./apsPrinter "$file"
-                echo "----------------------------------------------"
-            done
-            echo "*****>>> Done with folder: $dir*****"
-            echo
-        fi
-    done
-
-    # Aps files that are there and not in dirs
-    for file in "$folder"/*.aps; do
-        [ -e "$file" ] || continue
-        echo "filename : $file"
-        echo "Result:"
-        ./apsPrinter "$file"
-        echo "----------------------------------------------"
-    done	
-    echo "******* ApsPrinter END *******"
-fi

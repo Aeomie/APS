@@ -48,7 +48,7 @@ dans un fichier nommé `SamplesApsV`, où V représente la version. Par exemple 
 - **APS 2 :** SamplesAps2.
 
 Pour exécuter les tests, il suffit d'appeler :
-- `./exec.sh SampleApsV <option>` : où <option> est la même qu'auparavant.
+- `./exec.sh SamplesApsV <option>` : où <option> est la même qu'auparavant.
 
 Pour exécuter les tests de la version précédente,
 par exemple si vous êtes dans `APS 1` et que
