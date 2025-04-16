@@ -1,0 +1,1256 @@
+   0  $accept : %entry% $end
+
+   1  prog : block
+
+   2  block : LBRA cmds RBRA
+
+   3  cmds : stat
+   4       | return
+   5       | def SEMIC cmds
+   6       | stat SEMIC cmds
+
+   7  return : RET expr
+
+   8  stat : ECHO expr
+   9       | SET lval expr
+  10       | IFB expr block block
+  11       | WHILE expr block
+  12       | CALL IDENT exprsp
+
+  13  def : CONST IDENT type expr
+  14      | FUN IDENT type LBRA args RBRA expr
+  15      | FUN REC IDENT type LBRA args RBRA expr
+  16      | VAR IDENT stype
+  17      | PROC IDENT LBRA argsp RBRA block
+  18      | PROC REC IDENT LBRA argsp RBRA block
+  19      | FUN IDENT type LBRA argsp RBRA block
+  20      | FUN REC IDENT type LBRA argsp RBRA block
+
+  21  type : stype
+  22       | LPAR types ARROW type RPAR
+
+  23  types : type
+  24        | type STAR types
+
+  25  stype : BOOL
+  26        | INT
+  27        | LPAR VEC stype RPAR
+
+  28  arg : IDENT DP type
+
+  29  args : arg
+  30       | arg COMMA args
+
+  31  argp : IDENT DP type
+  32       | IDVar IDENT DP type
+
+  33  argsp : argp
+  34        | argp COMMA argsp
+
+  35  exprp : expr
+  36        | LPAR ADR lval RPAR
+
+  37  exprsp : exprp
+  38         | exprp exprsp
+
+  39  expr : NUM
+  40       | IDENT
+  41       | LPAR IF expr expr expr RPAR
+  42       | LPAR expr exprsp RPAR
+  43       | LBRA args RBRA expr
+
+  44  exprs : expr
+  45        | expr exprs
+
+  46  lval : IDENT
+  47       | LPAR NTH lval expr RPAR
+
+  48  %entry% : '\001' prog
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . prog  (48)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 4
+	prog  goto 5
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	block : LBRA . cmds RBRA  (2)
+
+	CONST  shift 6
+	FUN  shift 7
+	VAR  shift 8
+	PROC  shift 9
+	ECHO  shift 10
+	SET  shift 11
+	IFB  shift 12
+	WHILE  shift 13
+	CALL  shift 14
+	RET  shift 15
+	.  error
+
+	cmds  goto 16
+	return  goto 17
+	def  goto 18
+	stat  goto 19
+
+
+state 4
+	prog : block .  (1)
+
+	.  reduce 1
+
+
+state 5
+	%entry% : '\001' prog .  (48)
+
+	.  reduce 48
+
+
+state 6
+	def : CONST . IDENT type expr  (13)
+
+	IDENT  shift 20
+	.  error
+
+
+state 7
+	def : FUN . IDENT type LBRA args RBRA expr  (14)
+	def : FUN . REC IDENT type LBRA args RBRA expr  (15)
+	def : FUN . IDENT type LBRA argsp RBRA block  (19)
+	def : FUN . REC IDENT type LBRA argsp RBRA block  (20)
+
+	IDENT  shift 21
+	REC  shift 22
+	.  error
+
+
+state 8
+	def : VAR . IDENT stype  (16)
+
+	IDENT  shift 23
+	.  error
+
+
+state 9
+	def : PROC . IDENT LBRA argsp RBRA block  (17)
+	def : PROC . REC IDENT LBRA argsp RBRA block  (18)
+
+	IDENT  shift 24
+	REC  shift 25
+	.  error
+
+
+state 10
+	stat : ECHO . expr  (8)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 30
+
+
+state 11
+	stat : SET . lval expr  (9)
+
+	IDENT  shift 31
+	LPAR  shift 32
+	.  error
+
+	lval  goto 33
+
+
+state 12
+	stat : IFB . expr block block  (10)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 34
+
+
+state 13
+	stat : WHILE . expr block  (11)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 35
+
+
+state 14
+	stat : CALL . IDENT exprsp  (12)
+
+	IDENT  shift 36
+	.  error
+
+
+state 15
+	return : RET . expr  (7)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 37
+
+
+state 16
+	block : LBRA cmds . RBRA  (2)
+
+	RBRA  shift 38
+	.  error
+
+
+state 17
+	cmds : return .  (4)
+
+	.  reduce 4
+
+
+state 18
+	cmds : def . SEMIC cmds  (5)
+
+	SEMIC  shift 39
+	.  error
+
+
+state 19
+	cmds : stat .  (3)
+	cmds : stat . SEMIC cmds  (6)
+
+	SEMIC  shift 40
+	RBRA  reduce 3
+
+
+state 20
+	def : CONST IDENT . type expr  (13)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 44
+	stype  goto 45
+
+
+state 21
+	def : FUN IDENT . type LBRA args RBRA expr  (14)
+	def : FUN IDENT . type LBRA argsp RBRA block  (19)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 46
+	stype  goto 45
+
+
+state 22
+	def : FUN REC . IDENT type LBRA args RBRA expr  (15)
+	def : FUN REC . IDENT type LBRA argsp RBRA block  (20)
+
+	IDENT  shift 47
+	.  error
+
+
+state 23
+	def : VAR IDENT . stype  (16)
+
+	LPAR  shift 48
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	stype  goto 49
+
+
+state 24
+	def : PROC IDENT . LBRA argsp RBRA block  (17)
+
+	LBRA  shift 50
+	.  error
+
+
+state 25
+	def : PROC REC . IDENT LBRA argsp RBRA block  (18)
+
+	IDENT  shift 51
+	.  error
+
+
+state 26
+	expr : NUM .  (39)
+
+	.  reduce 39
+
+
+state 27
+	expr : IDENT .  (40)
+
+	.  reduce 40
+
+
+state 28
+	expr : LBRA . args RBRA expr  (43)
+
+	IDENT  shift 52
+	.  error
+
+	arg  goto 53
+	args  goto 54
+
+
+state 29
+	expr : LPAR . IF expr expr expr RPAR  (41)
+	expr : LPAR . expr exprsp RPAR  (42)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	IF  shift 55
+	.  error
+
+	expr  goto 56
+
+
+state 30
+	stat : ECHO expr .  (8)
+
+	.  reduce 8
+
+
+state 31
+	lval : IDENT .  (46)
+
+	.  reduce 46
+
+
+state 32
+	lval : LPAR . NTH lval expr RPAR  (47)
+
+	NTH  shift 57
+	.  error
+
+
+state 33
+	stat : SET lval . expr  (9)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 58
+
+
+state 34
+	stat : IFB expr . block block  (10)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 59
+
+
+state 35
+	stat : WHILE expr . block  (11)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 60
+
+
+state 36
+	stat : CALL IDENT . exprsp  (12)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 61
+	.  error
+
+	expr  goto 62
+	exprp  goto 63
+	exprsp  goto 64
+
+
+state 37
+	return : RET expr .  (7)
+
+	.  reduce 7
+
+
+state 38
+	block : LBRA cmds RBRA .  (2)
+
+	.  reduce 2
+
+
+state 39
+	cmds : def SEMIC . cmds  (5)
+
+	CONST  shift 6
+	FUN  shift 7
+	VAR  shift 8
+	PROC  shift 9
+	ECHO  shift 10
+	SET  shift 11
+	IFB  shift 12
+	WHILE  shift 13
+	CALL  shift 14
+	RET  shift 15
+	.  error
+
+	cmds  goto 65
+	return  goto 17
+	def  goto 18
+	stat  goto 19
+
+
+state 40
+	cmds : stat SEMIC . cmds  (6)
+
+	CONST  shift 6
+	FUN  shift 7
+	VAR  shift 8
+	PROC  shift 9
+	ECHO  shift 10
+	SET  shift 11
+	IFB  shift 12
+	WHILE  shift 13
+	CALL  shift 14
+	RET  shift 15
+	.  error
+
+	cmds  goto 66
+	return  goto 17
+	def  goto 18
+	stat  goto 19
+
+
+state 41
+	type : LPAR . types ARROW type RPAR  (22)
+	stype : LPAR . VEC stype RPAR  (27)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	VEC  shift 67
+	.  error
+
+	type  goto 68
+	types  goto 69
+	stype  goto 45
+
+
+state 42
+	stype : BOOL .  (25)
+
+	.  reduce 25
+
+
+state 43
+	stype : INT .  (26)
+
+	.  reduce 26
+
+
+state 44
+	def : CONST IDENT type . expr  (13)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 70
+
+
+state 45
+	type : stype .  (21)
+
+	.  reduce 21
+
+
+state 46
+	def : FUN IDENT type . LBRA args RBRA expr  (14)
+	def : FUN IDENT type . LBRA argsp RBRA block  (19)
+
+	LBRA  shift 71
+	.  error
+
+
+state 47
+	def : FUN REC IDENT . type LBRA args RBRA expr  (15)
+	def : FUN REC IDENT . type LBRA argsp RBRA block  (20)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 72
+	stype  goto 45
+
+
+state 48
+	stype : LPAR . VEC stype RPAR  (27)
+
+	VEC  shift 67
+	.  error
+
+
+state 49
+	def : VAR IDENT stype .  (16)
+
+	.  reduce 16
+
+
+state 50
+	def : PROC IDENT LBRA . argsp RBRA block  (17)
+
+	IDENT  shift 73
+	IDVar  shift 74
+	.  error
+
+	argp  goto 75
+	argsp  goto 76
+
+
+state 51
+	def : PROC REC IDENT . LBRA argsp RBRA block  (18)
+
+	LBRA  shift 77
+	.  error
+
+
+state 52
+	arg : IDENT . DP type  (28)
+
+	DP  shift 78
+	.  error
+
+
+state 53
+	args : arg .  (29)
+	args : arg . COMMA args  (30)
+
+	COMMA  shift 79
+	RBRA  reduce 29
+
+
+state 54
+	expr : LBRA args . RBRA expr  (43)
+
+	RBRA  shift 80
+	.  error
+
+
+state 55
+	expr : LPAR IF . expr expr expr RPAR  (41)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 81
+
+
+state 56
+	expr : LPAR expr . exprsp RPAR  (42)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 61
+	.  error
+
+	expr  goto 62
+	exprp  goto 63
+	exprsp  goto 82
+
+
+state 57
+	lval : LPAR NTH . lval expr RPAR  (47)
+
+	IDENT  shift 31
+	LPAR  shift 32
+	.  error
+
+	lval  goto 83
+
+
+state 58
+	stat : SET lval expr .  (9)
+
+	.  reduce 9
+
+
+state 59
+	stat : IFB expr block . block  (10)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 84
+
+
+state 60
+	stat : WHILE expr block .  (11)
+
+	.  reduce 11
+
+
+state 61
+	exprp : LPAR . ADR lval RPAR  (36)
+	expr : LPAR . IF expr expr expr RPAR  (41)
+	expr : LPAR . expr exprsp RPAR  (42)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	IF  shift 55
+	ADR  shift 85
+	.  error
+
+	expr  goto 56
+
+
+state 62
+	exprp : expr .  (35)
+
+	.  reduce 35
+
+
+state 63
+	exprsp : exprp .  (37)
+	exprsp : exprp . exprsp  (38)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 61
+	RBRA  reduce 37
+	RPAR  reduce 37
+	SEMIC  reduce 37
+
+	expr  goto 62
+	exprp  goto 63
+	exprsp  goto 86
+
+
+state 64
+	stat : CALL IDENT exprsp .  (12)
+
+	.  reduce 12
+
+
+state 65
+	cmds : def SEMIC cmds .  (5)
+
+	.  reduce 5
+
+
+state 66
+	cmds : stat SEMIC cmds .  (6)
+
+	.  reduce 6
+
+
+state 67
+	stype : LPAR VEC . stype RPAR  (27)
+
+	LPAR  shift 48
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	stype  goto 87
+
+
+state 68
+	types : type .  (23)
+	types : type . STAR types  (24)
+
+	STAR  shift 88
+	ARROW  reduce 23
+
+
+state 69
+	type : LPAR types . ARROW type RPAR  (22)
+
+	ARROW  shift 89
+	.  error
+
+
+state 70
+	def : CONST IDENT type expr .  (13)
+
+	.  reduce 13
+
+
+state 71
+	def : FUN IDENT type LBRA . args RBRA expr  (14)
+	def : FUN IDENT type LBRA . argsp RBRA block  (19)
+
+	IDENT  shift 90
+	IDVar  shift 74
+	.  error
+
+	arg  goto 53
+	args  goto 91
+	argp  goto 75
+	argsp  goto 92
+
+
+state 72
+	def : FUN REC IDENT type . LBRA args RBRA expr  (15)
+	def : FUN REC IDENT type . LBRA argsp RBRA block  (20)
+
+	LBRA  shift 93
+	.  error
+
+
+state 73
+	argp : IDENT . DP type  (31)
+
+	DP  shift 94
+	.  error
+
+
+state 74
+	argp : IDVar . IDENT DP type  (32)
+
+	IDENT  shift 95
+	.  error
+
+
+state 75
+	argsp : argp .  (33)
+	argsp : argp . COMMA argsp  (34)
+
+	COMMA  shift 96
+	RBRA  reduce 33
+
+
+state 76
+	def : PROC IDENT LBRA argsp . RBRA block  (17)
+
+	RBRA  shift 97
+	.  error
+
+
+state 77
+	def : PROC REC IDENT LBRA . argsp RBRA block  (18)
+
+	IDENT  shift 73
+	IDVar  shift 74
+	.  error
+
+	argp  goto 75
+	argsp  goto 98
+
+
+state 78
+	arg : IDENT DP . type  (28)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 99
+	stype  goto 45
+
+
+state 79
+	args : arg COMMA . args  (30)
+
+	IDENT  shift 52
+	.  error
+
+	arg  goto 53
+	args  goto 100
+
+
+state 80
+	expr : LBRA args RBRA . expr  (43)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 101
+
+
+state 81
+	expr : LPAR IF expr . expr expr RPAR  (41)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 102
+
+
+state 82
+	expr : LPAR expr exprsp . RPAR  (42)
+
+	RPAR  shift 103
+	.  error
+
+
+state 83
+	lval : LPAR NTH lval . expr RPAR  (47)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 104
+
+
+state 84
+	stat : IFB expr block block .  (10)
+
+	.  reduce 10
+
+
+state 85
+	exprp : LPAR ADR . lval RPAR  (36)
+
+	IDENT  shift 31
+	LPAR  shift 32
+	.  error
+
+	lval  goto 105
+
+
+state 86
+	exprsp : exprp exprsp .  (38)
+
+	.  reduce 38
+
+
+state 87
+	stype : LPAR VEC stype . RPAR  (27)
+
+	RPAR  shift 106
+	.  error
+
+
+state 88
+	types : type STAR . types  (24)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 68
+	types  goto 107
+	stype  goto 45
+
+
+state 89
+	type : LPAR types ARROW . type RPAR  (22)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 108
+	stype  goto 45
+
+
+state 90
+	arg : IDENT . DP type  (28)
+	argp : IDENT . DP type  (31)
+
+	DP  shift 109
+	.  error
+
+
+state 91
+	def : FUN IDENT type LBRA args . RBRA expr  (14)
+
+	RBRA  shift 110
+	.  error
+
+
+state 92
+	def : FUN IDENT type LBRA argsp . RBRA block  (19)
+
+	RBRA  shift 111
+	.  error
+
+
+state 93
+	def : FUN REC IDENT type LBRA . args RBRA expr  (15)
+	def : FUN REC IDENT type LBRA . argsp RBRA block  (20)
+
+	IDENT  shift 90
+	IDVar  shift 74
+	.  error
+
+	arg  goto 53
+	args  goto 112
+	argp  goto 75
+	argsp  goto 113
+
+
+state 94
+	argp : IDENT DP . type  (31)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 114
+	stype  goto 45
+
+
+state 95
+	argp : IDVar IDENT . DP type  (32)
+
+	DP  shift 115
+	.  error
+
+
+state 96
+	argsp : argp COMMA . argsp  (34)
+
+	IDENT  shift 73
+	IDVar  shift 74
+	.  error
+
+	argp  goto 75
+	argsp  goto 116
+
+
+state 97
+	def : PROC IDENT LBRA argsp RBRA . block  (17)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 117
+
+
+state 98
+	def : PROC REC IDENT LBRA argsp . RBRA block  (18)
+
+	RBRA  shift 118
+	.  error
+
+
+state 99
+	arg : IDENT DP type .  (28)
+
+	.  reduce 28
+
+
+state 100
+	args : arg COMMA args .  (30)
+
+	.  reduce 30
+
+
+state 101
+	expr : LBRA args RBRA expr .  (43)
+
+	.  reduce 43
+
+
+state 102
+	expr : LPAR IF expr expr . expr RPAR  (41)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 119
+
+
+state 103
+	expr : LPAR expr exprsp RPAR .  (42)
+
+	.  reduce 42
+
+
+state 104
+	lval : LPAR NTH lval expr . RPAR  (47)
+
+	RPAR  shift 120
+	.  error
+
+
+state 105
+	exprp : LPAR ADR lval . RPAR  (36)
+
+	RPAR  shift 121
+	.  error
+
+
+state 106
+	stype : LPAR VEC stype RPAR .  (27)
+
+	.  reduce 27
+
+
+state 107
+	types : type STAR types .  (24)
+
+	.  reduce 24
+
+
+state 108
+	type : LPAR types ARROW type . RPAR  (22)
+
+	RPAR  shift 122
+	.  error
+
+
+state 109
+	arg : IDENT DP . type  (28)
+	argp : IDENT DP . type  (31)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 123
+	stype  goto 45
+
+
+state 110
+	def : FUN IDENT type LBRA args RBRA . expr  (14)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 124
+
+
+state 111
+	def : FUN IDENT type LBRA argsp RBRA . block  (19)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 125
+
+
+state 112
+	def : FUN REC IDENT type LBRA args . RBRA expr  (15)
+
+	RBRA  shift 126
+	.  error
+
+
+state 113
+	def : FUN REC IDENT type LBRA argsp . RBRA block  (20)
+
+	RBRA  shift 127
+	.  error
+
+
+state 114
+	argp : IDENT DP type .  (31)
+
+	.  reduce 31
+
+
+state 115
+	argp : IDVar IDENT DP . type  (32)
+
+	LPAR  shift 41
+	BOOL  shift 42
+	INT  shift 43
+	.  error
+
+	type  goto 128
+	stype  goto 45
+
+
+state 116
+	argsp : argp COMMA argsp .  (34)
+
+	.  reduce 34
+
+
+state 117
+	def : PROC IDENT LBRA argsp RBRA block .  (17)
+
+	.  reduce 17
+
+
+state 118
+	def : PROC REC IDENT LBRA argsp RBRA . block  (18)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 129
+
+
+state 119
+	expr : LPAR IF expr expr expr . RPAR  (41)
+
+	RPAR  shift 130
+	.  error
+
+
+state 120
+	lval : LPAR NTH lval expr RPAR .  (47)
+
+	.  reduce 47
+
+
+state 121
+	exprp : LPAR ADR lval RPAR .  (36)
+
+	.  reduce 36
+
+
+state 122
+	type : LPAR types ARROW type RPAR .  (22)
+
+	.  reduce 22
+
+
+123: reduce/reduce conflict (reduce 28, reduce 31) on RBRA
+123: reduce/reduce conflict (reduce 28, reduce 31) on COMMA
+state 123
+	arg : IDENT DP type .  (28)
+	argp : IDENT DP type .  (31)
+
+	.  reduce 28
+
+
+state 124
+	def : FUN IDENT type LBRA args RBRA expr .  (14)
+
+	.  reduce 14
+
+
+state 125
+	def : FUN IDENT type LBRA argsp RBRA block .  (19)
+
+	.  reduce 19
+
+
+state 126
+	def : FUN REC IDENT type LBRA args RBRA . expr  (15)
+
+	NUM  shift 26
+	IDENT  shift 27
+	LBRA  shift 28
+	LPAR  shift 29
+	.  error
+
+	expr  goto 131
+
+
+state 127
+	def : FUN REC IDENT type LBRA argsp RBRA . block  (20)
+
+	LBRA  shift 3
+	.  error
+
+	block  goto 132
+
+
+state 128
+	argp : IDVar IDENT DP type .  (32)
+
+	.  reduce 32
+
+
+state 129
+	def : PROC REC IDENT LBRA argsp RBRA block .  (18)
+
+	.  reduce 18
+
+
+state 130
+	expr : LPAR IF expr expr expr RPAR .  (41)
+
+	.  reduce 41
+
+
+state 131
+	def : FUN REC IDENT type LBRA args RBRA expr .  (15)
+
+	.  reduce 15
+
+
+state 132
+	def : FUN REC IDENT type LBRA argsp RBRA block .  (20)
+
+	.  reduce 20
+
+
+Rules never reduced:
+	exprs : expr  (44)
+	exprs : expr exprs  (45)
+
+
+State 123 contains 2 reduce/reduce conflicts.
+
+
+32 terminals, 20 nonterminals
+49 grammar rules, 133 states

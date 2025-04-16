@@ -1,0 +1,11 @@
+[ 
+VAR x int;
+SET x 0;
+PROC p [y:int] 
+[
+    WHILE (lt x y) [
+        ECHO x;
+        SET x (add x 1)
+    ]
+];
+CALL p 2]

@@ -1,0 +1,5 @@
+[
+    CONST tab (vec int) (alloc 2);
+    CONST tablen int (len tab);
+    ECHO tablen
+]

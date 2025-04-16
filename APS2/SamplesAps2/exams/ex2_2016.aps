@@ -1,0 +1,10 @@
+[
+CONST f (int->int) [n:int](add n 10);
+VAR x int;
+SET x 32;
+WHILE (lt x 42)
+[
+    SET x (f x)
+];
+ECHO x
+]

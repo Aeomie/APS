@@ -1,0 +1,8 @@
+[
+VAR x int;
+PROC p [var y: int] [
+    SET y 0
+];
+CALL p (adr x);
+ECHO x
+]
